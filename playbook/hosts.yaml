@@ -1,0 +1,7 @@
+all:
+  hosts:
+    machine:
+      ansible_ssh_user: user
+      ansible_ssh_pass: 1234
+      ansible_sudo_pass: 1234
+      ansible_ssh_host: localhost

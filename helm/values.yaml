@@ -1,0 +1,6 @@
+containers:
+  image: ghcr.io/boomblee/app_image:1.0.0
+
+author: "kcaraway"
+
+replicaCount: 3

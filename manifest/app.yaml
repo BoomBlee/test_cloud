@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kcaraway
+  name: kcaraway-svc
+spec:
+  selector:
+    app: app
+  type: ClusterIP
+  ports:
+    - name: app-port
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kcaraway
+  name: kcaraway-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: kcaraway-app
+        image: ghcr.io/boomblee/app_image:1.0.0
+        ports:
+        - containerPort: 8000
+        imagePullPolicy: Always
+        env:
+        - name: UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: AUTHOR
+          value: "kcaraway"
+        livenessProbe:
+          httpGet:
+            path: /healthz/live
+            port: 8000
+          failureThreshold: 3
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz/ready
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10

@@ -1,0 +1,41 @@
+- hosts: all
+  become: true
+  vars_files:
+    - files/vault
+
+  tasks:
+    - name: create user
+      user:
+        name: "{{ username }}"
+        password: "{{ password | password_hash('sha512') }}"
+        update_password: "on_create"
+
+    - name: Setting ssh
+      block:
+      - name: Disallow root SSH access
+        lineinfile:
+          dest: "/etc/ssh/sshd_config"
+          regexp: "^PermitRootLogin"
+          line: "PermitRootLogin no"
+          state: present
+
+      - name: "Disallow password authentication"
+        lineinfile:
+          dest: "/etc/ssh/sshd_config"
+          regexp: "^PasswordAuthentication"
+          line: "PasswordAuthentication no"
+          state: "present"
+
+      - name: Set authorized key for "{{ username }}"
+        authorized_key:
+          user: "{{ username }}"
+          state: present
+          key: "{{ key_pub }}"
+
+      notify: Restart ssh
+
+  handlers:
+    - name: Restart ssh
+      service:
+        name: sshd
+        state: restarted
