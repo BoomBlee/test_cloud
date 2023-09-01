@@ -12,6 +12,12 @@
 
     - name: Setting ssh
       block:
+      - name: Set authorized key for "{{ username }}"
+        authorized_key:
+          user: "{{ username }}"
+          state: present
+          key: "{{ key_pub }}"
+
       - name: Disallow root SSH access
         lineinfile:
           dest: "/etc/ssh/sshd_config"
@@ -25,12 +31,6 @@
           regexp: "^PasswordAuthentication"
           line: "PasswordAuthentication no"
           state: "present"
-
-      - name: Set authorized key for "{{ username }}"
-        authorized_key:
-          user: "{{ username }}"
-          state: present
-          key: "{{ key_pub }}"
 
       notify: Restart ssh
 
